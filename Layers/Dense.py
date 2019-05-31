@@ -25,7 +25,7 @@ class Dense(object):
             raise ValueError("Invalid input shape for Dense layer."
              "Dense layer can only be preceded by Input, Dense or Flatten layers")    
         if input_shape:
-            self.weights = np.random.normal(size=(input_shape,self.units))
+            self.weights = np.random.normal(scale=0.1,size=(input_shape,self.units))
         else:
             self.weights = np.random.normal(size=(previous_layer.units,self.units))       
         self.bias = np.zeros(self.units)

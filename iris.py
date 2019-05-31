@@ -26,7 +26,7 @@ nn = Model(4)
 nn.add(Dense(4,'relu'))
 nn.add(Dense(3,'sigmoid'))
 
-nn.train(1e-2, train_dataset, 64, 100, 'mse')
+nn.train(1e-2, train_dataset, 100, 'mse')
 
 
 

@@ -35,8 +35,8 @@ class Model(object):
         
         self.layer_graph.append(obj)
 
-    def train(self,learning_rate, dataset, batch_size, num_epochs, loss_fn):
-        num_iters = int(dataset.length/batch_size)
+    def train(self,learning_rate, dataset, num_epochs, loss_fn):
+        num_iters = int(dataset.length/dataset.batch_size)
         if loss_fn != 'cross_entropy_with_softmax':
             loss_fn,loss_fn_derivative = loss_dict[loss_fn]
         else:
