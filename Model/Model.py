@@ -1,4 +1,14 @@
+import sys
+sys.path.append('~/common_data/Projects/Custom_CNN_Lib')
+
 import numpy as np
+from Losses.Losses import *
+
+loss_dict = {
+    'mse': (mean_squared_error,mean_squared_error_derivative)
+    #bin crossentropy
+    #cat crossentropy with logits
+}
 
 class Model(object):
     def __init__(self,input_shape):
@@ -21,12 +31,12 @@ class Model(object):
         if not self.layer_graph:
             obj._init_weights(input_shape=self.input_shape)
         else:
-            obj._init_weights(inputs=self.layer_graph[-1])
+            obj._init_weights(previous_layer=self.layer_graph[-1])
         
         self.layer_graph.append(obj)
 
     def train(self,learning_rate, dataset, batch_size, num_epochs, loss_fn):
-        num_iters = dataset.length/batch_size
+        num_iters = int(dataset.length/batch_size)
         if loss_fn != 'cross_entropy_with_softmax':
             loss_fn,loss_fn_derivative = loss_dict[loss_fn]
         else:
@@ -42,6 +52,7 @@ class Model(object):
                 #Compute loss
                 if loss_fn:
                     loss = loss_fn(out,y_train)
+                    print(loss)
                     loss_log.append(loss)
                     # @todo: write plot code
 
@@ -68,7 +79,7 @@ class Model(object):
         for layer in self.layer_graph[1:]:
             if (type(layer).__name__ == 'Dense' or 
                     type(layer).__name__ == 'Conv'):
-                layer.weights -= lr*layer.weight_grad
+                layer.weights -= lr*layer.weights_grad
                 layer.bias -= lr*layer.bias_grad
             elif type(layer).__name__ == 'BatchNorm':
                 pass

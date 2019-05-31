@@ -1,6 +1,14 @@
-import numpy as np
+import sys
+sys.path.append('~/common_data/Projects/Custom_CNN_Lib')
 
-activations_dict = dict()
+import numpy as np
+from Activations.standard_activations import *
+
+activations_dict = {
+    'relu': (relu,reluBackward), 
+    'sigmoid': (sigmoid,sigmoidBackward)
+    #tanh
+}
 class Dense(object):
     # User init
     def __init__(self,units,activation):
@@ -11,7 +19,7 @@ class Dense(object):
         # self.cache = []
         
     # Init performed by parent Model object
-    def _weights_init(self,previous_layer=None,input_shape=None):
+    def _init_weights(self,previous_layer=None,input_shape=None):
         
         if hasattr(previous_layer,'weights') and previous_layer.weights.ndim != 2:
             raise ValueError("Invalid input shape for Dense layer."
@@ -27,10 +35,11 @@ class Dense(object):
         Z = np.matmul(X,self.weights) + self.bias
         A = self.activation(Z)
         self.X = X
+        self.Z = Z
         return A
 
     def _backward_pass(self, gradients):
-        gradients = self.activation_derivative(gradients)
+        gradients = self.activation_derivative(gradients,self.Z)
         self.weights_grad = np.matmul(self.X.T,gradients)
         self.bias_grad = np.sum(gradients,axis=0)
         input_grad = np.matmul(gradients, self.weights.T)

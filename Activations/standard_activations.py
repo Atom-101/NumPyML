@@ -10,7 +10,7 @@ def sigmoid(Z):
         1/(1+np.exp(-Z)), 
         np.exp(Z)/(1+np.exp(Z))
     )
-    return A,Z
+    return A
 
 def softmax(Z):
     A = np.exp(Z)/np.sum(np.exp(Z))
@@ -18,7 +18,7 @@ def softmax(Z):
 
 def relu(Z):
 	A = np.where(Z>0, Z, 0)
-	return A,Z
+	return A
 
 def sigmoidBackward(dA, activation_cache):
 	temp = np.exp(-activation_cache)
