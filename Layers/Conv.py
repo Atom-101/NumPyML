@@ -4,18 +4,23 @@ from Activations.standard_activations import *
 activations_dict = {
     'relu': (relu,reluBackward), 
     'sigmoid': (sigmoid,sigmoidBackward)
+    #lrelu
     #tanh
 }
 
 class Conv(object):
-    def __init__(self,kernel_size,filters,stride,padding,activation):
+    def __init__(self,kernel_size,filters,stride=1,padding='same',activation):
         # Follows (Filters, Height, Width, Channels) convention
         try:
             int(kernel_size)
             kernel_size = (kernel_size,kernel_size)
         except:
             pass
-        
+        try:
+            int(stride)
+            stride = (stride,stride)
+        except:
+            pass        
         self.kernel_size = kernel_size
         self.filters = filters
         self.stride = stride
@@ -43,8 +48,8 @@ class Conv(object):
         # self.padding = pad [left,up,right,down]
 
         batch_size = X.shape[0]
-        Z_height = int(1 + (X.shape[1] - self.weights.shape[1])/self.stride)
-        Z_width = int(1 + (X.shape[2] - self.weights.shape[2])/self.stride)
+        Z_height = int(1 + (X.shape[1] - self.weights.shape[1])/self.stride[0])
+        Z_width = int(1 + (X.shape[2] - self.weights.shape[2])/self.stride[1])
         Z = np.zeros((batch_size,Z_height,Z_width,self.filters))
         
 
@@ -55,8 +60,8 @@ class Conv(object):
                         Z[n,h,w,f] = np.sum(
                             X[
                                 n, 
-                                h*self.stride:h*self.stride+self.kernel_size[0], 
-                                w*self.stride:w*self.stride+self.kernel_size[1],
+                                h*self.stride[0]:h*self.stride[0]+self.kernel_size[0], 
+                                w*self.stride[1]:w*self.stride[1]+self.kernel_size[1],
                                 :
                             ] *
                             self.weights[f]
@@ -82,8 +87,8 @@ class Conv(object):
                         self.weights_grad[f] += np.multiply( 
                             self.X[
                                 n,
-                                h*self.stride:h*self.stride+self.kernel_size[0],
-                                w*self.stride:w*self.stride+self.kernel_size[1],
+                                h*self.stride[0]:h*self.stride[0]+self.kernel_size[0],
+                                w*self.stride[1]:w*self.stride[1]+self.kernel_size[1],
                                 :
                             ],
                             gradients[n,h,w,f]
@@ -91,8 +96,8 @@ class Conv(object):
                         self.bias_grad[f] += gradients[n,h,w,f]
                         X_grad_padded[
                             n,
-                            h*self.stride:h*self.stride+self.kernel_size[0],
-                            w*self.stride:w*self.stride+self.kernel_size[1],
+                            h*self.stride[0]:h*self.stride[0]+self.kernel_size[0],
+                            w*self.stride[1]:w*self.stride[1]+self.kernel_size[1],
                             :
                         ] += self.weights[f] * gradients[n,h,w,f]
         
