@@ -6,6 +6,7 @@ import numpy as np
 
 from Model.Model import Model
 from Layers.Dense import Dense
+from Layers.Conv import Conv
 from Dataset.Dataset import Dataset
 
 df = pd.read_csv('Iris.csv')
@@ -26,7 +27,7 @@ nn = Model(4)
 nn.add(Dense(4,'relu'))
 nn.add(Dense(3,'sigmoid'))
 
-nn.train(1e-2, train_dataset, 100, 'mse')
+nn.train(1e-2, train_dataset, 30, 'binary_cross_entropy')
 
 
 

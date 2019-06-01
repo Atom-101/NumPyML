@@ -19,15 +19,14 @@ class Dense(object):
         # self.cache = []
         
     # Init performed by parent Model object
-    def _init_weights(self,previous_layer=None,input_shape=None):
-        
+    def _init_weights(self,previous_layer=None,input_shape=None):        
         if hasattr(previous_layer,'weights') and previous_layer.weights.ndim != 2:
             raise ValueError("Invalid input shape for Dense layer."
              "Dense layer can only be preceded by Input, Dense or Flatten layers")    
         if input_shape:
-            self.weights = np.random.normal(scale=0.1,size=(input_shape,self.units))
+            self.weights = np.random.normal(loc=0, scale=0.1, size=(input_shape,self.units))
         else:
-            self.weights = np.random.normal(size=(previous_layer.units,self.units))       
+            self.weights = np.random.normal(loc=0, scale=0.1, size=(previous_layer.units,self.units))       
         self.bias = np.zeros(self.units)
         # self.previous_layer = previous_layer
 

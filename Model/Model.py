@@ -5,8 +5,8 @@ import numpy as np
 from Losses.Losses import *
 
 loss_dict = {
-    'mse': (mean_squared_error,mean_squared_error_derivative)
-    #bin crossentropy
+    'mse': (mean_squared_error,mean_squared_error_derivative),
+    'binary_cross_entropy' : (binary_cross_entropy,binary_cross_entropy_derivative)
     #cat crossentropy with logits
 }
 
@@ -76,7 +76,7 @@ class Model(object):
             grad = layer._backward_pass(grad)
 
     def _update_parameters(self,lr):
-        for layer in self.layer_graph[1:]:
+        for layer in self.layer_graph:
             if (type(layer).__name__ == 'Dense' or 
                     type(layer).__name__ == 'Conv'):
                 layer.weights -= lr*layer.weights_grad
