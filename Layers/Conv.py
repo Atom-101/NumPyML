@@ -1,4 +1,5 @@
 import numpy as np
+import math
 from Activations.standard_activations import *
 
 activations_dict = {
@@ -9,7 +10,7 @@ activations_dict = {
 }
 
 class Conv(object):
-    def __init__(self,kernel_size,filters,stride=1,padding='same',activation):
+    def __init__(self,kernel_size,filters,stride,padding,activation):
         # Follows (Filters, Height, Width, Channels) convention
         try:
             int(kernel_size)
@@ -30,10 +31,13 @@ class Conv(object):
         
     def _init_weights(self,previous_layer=None,input_shape=None):        
         if input_shape:
-            channels = input_shape
+            height,width,channels = input_shape
         else:
-            channels = previous_layer.filters
+            height,width,channels = previous_layer.output_height,previous_layer.output_width,previous_layer.filters
 
+        self.pad = self._pad(height=height,width=width)
+        self.output_height = (height - self.kernel_size[0] + 2*(self.pad[0]+self.pad[1]))/self.stride[0] + 1
+        self.output_width = (width - self.kernel_size[1] + 2*(self.pad[2]+self.pad[3]))/self.stride[1] + 1
         
         self.weights = np.random.normal(
             loc=0,
@@ -41,18 +45,18 @@ class Conv(object):
             size=(self.filters,self.kernel_size[0],self.kernel_size[1],channels)
         )
         self.bias = np.zeros((self.filters))
+        
 
     def _forward_pass(self,X):
         # @todo: handle padding
-        # X,pad = pad(X,self.padding)
-        # self.padding = pad [left,up,right,down]
+        X,pad = self._pad(X=X)
+        self.pad = pad
 
         batch_size = X.shape[0]
         Z_height = int(1 + (X.shape[1] - self.weights.shape[1])/self.stride[0])
         Z_width = int(1 + (X.shape[2] - self.weights.shape[2])/self.stride[1])
         Z = np.zeros((batch_size,Z_height,Z_width,self.filters))
         
-
         for n in range(batch_size):
             for f in range(self.filters):
                 for h in range(Z_height):
@@ -103,11 +107,35 @@ class Conv(object):
         
         X_grad = X_grad_padded[
             :,
-            self.padding[0]:-(self.padding[2]+1),
-            self.padding[1]:-(self.padding[3]+1),
+            self.pad[0]:-(self.pad[1]+1),
+            self.pad[2]:-(self.pad[3]+1),
             :
         ]
         return X_grad
 
-
+    def _pad(self, **kwargs):
+        if self.padding == 'valid':
+            return [0,0,0,0]
+        
+        def _pad_util(height,width):
+            pad = [0,0,0,0]
+            pad_h = math.ceil(((self.stride[0]-1)*height - self.stride[0] + self.kernel_size[0])/2.0)
+            pad_w = math.ceil(((self.stride[1]-1)*width - self.stride[1] + self.kernel_size[1])/2.0)
+            pad[0] = pad_h/2
+            pad[1] = pad_h - pad[0]
+            pad[2] = pad_w/2
+            pad[3] = pad_w - pad[2]
+            return pad
+        
+        try:
+            height = kwargs['height']
+            width = kwargs['width']
+            return _pad_util(height,width)
+            
+        except:
+            X = kwargs['X']
+            _,height,width,_ = X.shape
+            pad = _pad_util(height,width)
+            X = np.pad(X, ((0,0),pad[:2],pad[2:],(0,0)), 'constant')
+            return X,pad
         

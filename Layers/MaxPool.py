@@ -21,7 +21,7 @@ class MaxPool(object):
         self.stride = stride
 
     def _forward_pass(self,X):
-        batch_size,Z_channels = X.shape[0],X.shape[3]
+        batch_size,_,_,Z_channels = X.shape
         Z_height = int(1 + (X.shape[1] - self.kernel_size[0])/self.stride)
         Z_width = int(1 + (X.shape[2] - self.kernel_size[0])/self.stride)
         Z = np.zeros((batch_size,Z_height,Z_width,Z_channels))
