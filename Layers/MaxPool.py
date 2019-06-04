@@ -20,10 +20,16 @@ class MaxPool(object):
         self.kernel_size = kernel_size
         self.stride = stride
 
+    def _init_weights(self,previous_layer):
+        height,width,channels = previous_layer.output_height,previous_layer.output_width,previous_layer.filters
+        self.output_height = int(1+(height - self.kernel_size[0])/self.stride[0])
+        self.output_width = int(1+(width - self.kernel_size[1])/self.stride[1])
+        self.filters = channels
+        
     def _forward_pass(self,X):
         batch_size,_,_,Z_channels = X.shape
-        Z_height = int(1 + (X.shape[1] - self.kernel_size[0])/self.stride)
-        Z_width = int(1 + (X.shape[2] - self.kernel_size[0])/self.stride)
+        Z_height = int(1 + (X.shape[1] - self.kernel_size[0])/self.stride[0])
+        Z_width = int(1 + (X.shape[2] - self.kernel_size[0])/self.stride[1])
         Z = np.zeros((batch_size,Z_height,Z_width,Z_channels))
 
         for n in range(batch_size):

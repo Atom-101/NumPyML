@@ -35,9 +35,10 @@ class Conv(object):
         else:
             height,width,channels = previous_layer.output_height,previous_layer.output_width,previous_layer.filters
 
-        self.pad = self._pad(height=height,width=width)
-        self.output_height = (height - self.kernel_size[0] + 2*(self.pad[0]+self.pad[1]))/self.stride[0] + 1
-        self.output_width = (width - self.kernel_size[1] + 2*(self.pad[2]+self.pad[3]))/self.stride[1] + 1
+        padh = math.ceil(((self.stride[0]-1)*height - self.stride[0] + self.kernel_size[0])/2.0)
+        padw = math.ceil(((self.stride[1]-1)*width - self.stride[1] + self.kernel_size[1])/2.0)
+        self.output_height = int((height - self.kernel_size[0] + 2*padh)/self.stride[0] + 1)
+        self.output_width = int((width - self.kernel_size[1] + 2*padw)/self.stride[1] + 1)
         
         self.weights = np.random.normal(
             loc=0,
@@ -113,12 +114,16 @@ class Conv(object):
         ]
         return X_grad
 
-    def _pad(self, **kwargs):
-        if self.padding == 'valid':
-            return [0,0,0,0]
+    def _pad(self, X):
+        _,height,width,_ = X.shape
+        pad = _pad_util(height,width)
+        X = np.pad(X, ((0,0),pad[:2],pad[2:],(0,0)), 'constant')
+        return X,pad
         
         def _pad_util(height,width):
             pad = [0,0,0,0]
+            if self.padding == 'valid':
+                return pad
             pad_h = math.ceil(((self.stride[0]-1)*height - self.stride[0] + self.kernel_size[0])/2.0)
             pad_w = math.ceil(((self.stride[1]-1)*width - self.stride[1] + self.kernel_size[1])/2.0)
             pad[0] = pad_h/2
@@ -127,15 +132,5 @@ class Conv(object):
             pad[3] = pad_w - pad[2]
             return pad
         
-        try:
-            height = kwargs['height']
-            width = kwargs['width']
-            return _pad_util(height,width)
-            
-        except:
-            X = kwargs['X']
-            _,height,width,_ = X.shape
-            pad = _pad_util(height,width)
-            X = np.pad(X, ((0,0),pad[:2],pad[2:],(0,0)), 'constant')
-            return X,pad
+        
         
