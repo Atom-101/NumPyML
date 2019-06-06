@@ -3,8 +3,8 @@ import math
 from Activations.standard_activations import *
 
 activations_dict = {
-    'relu': (relu,reluBackward), 
-    'sigmoid': (sigmoid,sigmoidBackward)
+    'relu': (relu,relu_backward), 
+    'sigmoid': (sigmoid,sigmoid_backward)
     #lrelu
     #tanh
 }

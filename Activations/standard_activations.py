@@ -12,21 +12,34 @@ def sigmoid(Z):
     )
     return A
 
-def softmax(Z):
-    A = np.exp(Z)/np.sum(np.exp(Z))
-    return A,Z
+def sigmoid_backward(gradients, Z):
+	temp = np.exp(-Z)
+	temp = np.nan_to_num(np.divide(temp,(1+temp)**2))
+	Z_grad = np.multiply(gradients,temp)
+	return Z_grad
+
+# def softmax(Z):
+#     A = np.exp(Z)/np.sum(np.exp(Z))
+#     return A,Z
 
 def relu(Z):
 	A = np.where(Z>0, Z, 0)
 	return A
-
-def sigmoidBackward(dA, activation_cache):
-	temp = np.exp(-activation_cache)
-	temp = np.nan_to_num(np.divide(temp,(1+temp)**2))
-	dZ = np.multiply(dA,temp)
-	return dZ
 	
-def reluBackward(dA, activation_cache):
-    temp = 1.0*(activation_cache>0)
-    dZ = np.multiply(dA,temp)
-    return dZ
+def relu_backward(gradients, Z):
+    Z_grad = np.where(Z>0, gradients, 0)
+    return Z_grad
+
+def leaky_relu(Z,alpha=0.1):
+    A = np.where(Z>0,Z,alpha*Z)
+    return A
+
+def leaky_relu_backward(gradients, Z, alpha=0.1):
+    Z_grad = np.where(Z>0,gradients,alpha*gradients)
+    return Z_grad
+
+def linear(Z):
+    return Z
+
+def linear_backward(gradients):
+    return gradients
