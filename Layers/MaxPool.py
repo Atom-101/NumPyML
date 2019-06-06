@@ -55,7 +55,7 @@ class MaxPool(object):
             for c in range(Z_channels):
                 for h in range(Z_height):
                     for w in range(Z_width):
-                        binary_mask = np.zeros((self.kernel_size[0],self.kernel_size[1]))
+                        binary_mask = np.zeros(self.kernel_size)
                         max_index = np.unravel_index(
                             np.argmax(
                                 self.X[
@@ -64,7 +64,8 @@ class MaxPool(object):
                                     w*self.stride[1]:w*self.stride[1]+self.kernel_size[1],
                                     c
                                 ]
-                            )
+                            ),
+                            self.kernel_size
                         )
                         binary_mask[max_index[0],max_index[1]] += 1
                         X_grad[
@@ -73,3 +74,4 @@ class MaxPool(object):
                             w*self.stride[1]:w*self.stride[1]+self.kernel_size[1],
                             c
                         ] += binary_mask * gradients[n,h,w,c]
+        return X_grad

@@ -12,4 +12,3 @@ activations_dict = {
 class Activation(object):
     def __init__(self,activation):
         self.activation,self.activation_derivative = activations_dict[activation]
-        

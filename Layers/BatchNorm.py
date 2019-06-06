@@ -5,16 +5,19 @@ class BatchNorm(object):
         self.momentum = momentum
 
     def _init_weights(self,previous_layer):
-        dim = previous_layer.weights.shape[-1]
+        if previous_layer.weights.ndim == 2:
+            dim = previous_layer.shape[1]
+        else:
+            dim= previous_layer.weights.shape[0]
         self.running_mean = np.zeros(dim)    
         self.running_var = np.zeros(dim)
         self.gamma = np.ones(dim)    
         self.beta = np.zeros(dim)
 
         if previous_layer.weights.ndim == 2:
-            self.units = previous_layer.shape[1]
+            self.units = previous_layer.units
         else:
-            self.output_height,self.output_width,self.filters = previous_layer.weights.shape[1:]
+            self.output_height,self.output_width,self.filters = previous_layer.output_height,previous_layer.output_width,previous_layer.filters
 
     def _forward_pass(self,X,train):
         if train:
