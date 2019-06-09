@@ -125,3 +125,4 @@ dmypy.json
 
 train/
 .vscode/
+.pyc

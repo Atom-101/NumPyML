@@ -6,7 +6,7 @@ class BatchNorm(object):
 
     def _init_weights(self,previous_layer):
         if previous_layer.weights.ndim == 2:
-            dim = previous_layer.shape[1]
+            dim = previous_layer.weights.shape[1]
         else:
             dim= previous_layer.weights.shape[0]
         self.running_mean = np.zeros(dim)    

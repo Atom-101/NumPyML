@@ -4,8 +4,8 @@ from Activations.standard_activations import *
 
 activations_dict = {
     'relu': (relu,relu_backward), 
-    'sigmoid': (sigmoid,sigmoid_backward)
-    #lrelu
+    'sigmoid': (sigmoid,sigmoid_backward),
+    'leaky_relu': (leaky_relu,leaky_relu_backward)
     #tanh
 }
 
@@ -108,14 +108,16 @@ class Conv(object):
                             w*self.stride[1]:w*self.stride[1]+self.kernel_size[1],
                             :
                         ] += self.weights[f] * gradients[n,h,w,f]
-        
-        X_grad = X_grad_padded[
-            :,
-            self.pad[0]:-self.pad[1],
-            self.pad[2]:-self.pad[3],
-            :
-        ]
-        return X_grad
+        if self.padding != 'valid':
+            X_grad = X_grad_padded[
+                :,
+                self.pad[0]:-self.pad[1],
+                self.pad[2]:-self.pad[3],
+                :
+            ]
+            return X_grad
+        else:
+            return X_grad_padded
 
     def _pad(self, X):
         def _pad_util(height,width):
