@@ -1,5 +1,6 @@
 import numpy as np
 import math
+from numba import jit
 from Activations.standard_activations import *
 
 activations_dict = {
@@ -8,6 +9,48 @@ activations_dict = {
     #lrelu
     #tanh
 }
+
+@jit(nopython=True)
+def convolve(batch_size,stride,kernel_size,filters,Z_height,Z_width,Z,X,weights,bias):
+    for n in range(batch_size):
+        for f in range(filters):
+            for h in range(Z_height):
+                for w in range(Z_width):
+                    Z[n,h,w,f] = np.sum(
+                        X[
+                            n, 
+                            h*stride[0]:h*stride[0]+kernel_size[0], 
+                            w*stride[1]:w*stride[1]+kernel_size[1],
+                            :
+                        ] *
+                        weights[f]
+                    )
+                    Z[n,h,w,f] += bias[f]
+    return Z
+
+@jit(nopython=True)
+def convolve_back(batch_size,stride,kernel_size,filters,Z_height,Z_width,gradients,X,weights,weights_grad,bias_grad,X_grad_padded):
+    for n in range(batch_size):
+        for f in range(filters):
+            for h in range(Z_height):
+                for w in range(Z_width):
+                    weights_grad[f] += np.multiply( 
+                        X[
+                            n,
+                            h*stride[0]:h*stride[0]+kernel_size[0],
+                            w*stride[1]:w*stride[1]+kernel_size[1],
+                            :
+                        ],
+                        gradients[n,h,w,f]
+                    )
+                    bias_grad[f] += gradients[n,h,w,f]
+                    X_grad_padded[
+                        n,
+                        h*stride[0]:h*stride[0]+kernel_size[0],
+                        w*stride[1]:w*stride[1]+kernel_size[1],
+                        :
+                    ] += weights[f] * gradients[n,h,w,f]
+    return X_grad_padded
 
 class Conv(object):
     def __init__(self,kernel_size,filters,stride,padding,activation):
@@ -50,9 +93,7 @@ class Conv(object):
         )
         self.bias = np.zeros((self.filters))
         
-
     def _forward_pass(self,X):
-        # @todo: handle padding
         X,pad = self._pad(X)
         self.pad = pad
 
@@ -60,55 +101,19 @@ class Conv(object):
         Z_height = int(1 + (X.shape[1] - self.weights.shape[1])/self.stride[0])
         Z_width = int(1 + (X.shape[2] - self.weights.shape[2])/self.stride[1])
         Z = np.zeros((batch_size,Z_height,Z_width,self.filters))
-        
-        for n in range(batch_size):
-            for f in range(self.filters):
-                for h in range(Z_height):
-                    for w in range(Z_width):
-                        Z[n,h,w,f] = np.sum(
-                            X[
-                                n, 
-                                h*self.stride[0]:h*self.stride[0]+self.kernel_size[0], 
-                                w*self.stride[1]:w*self.stride[1]+self.kernel_size[1],
-                                :
-                            ] *
-                            self.weights[f]
-                        )
-                        Z[n,h,w,f] += self.bias[f]
+        Z = convolve(batch_size,self.stride,self.kernel_size,self.filters,Z_height,Z_width,Z,X,self.weights,self.bias)
         self.X = X
         self.Z = Z
 
         return self.activation(Z)
 
-
-    def _backward_pass(self, gradients):
+    def _backward_pass(self, gradients):       
         gradients = self.activation_derivative(gradients, self.Z)
         batch_size, Z_height, Z_width = gradients.shape[:3] 
         self.weights_grad = np.zeros_like(self.weights)
         self.bias_grad = np.zeros_like(self.bias)
         X_grad_padded = np.zeros_like(self.X,dtype=np.float32)
-        
-        for n in range(batch_size):
-            for f in range(self.filters):
-                for h in range(Z_height):
-                    for w in range(Z_width):
-                        self.weights_grad[f] += np.multiply( 
-                            self.X[
-                                n,
-                                h*self.stride[0]:h*self.stride[0]+self.kernel_size[0],
-                                w*self.stride[1]:w*self.stride[1]+self.kernel_size[1],
-                                :
-                            ],
-                            gradients[n,h,w,f]
-                        )
-                        self.bias_grad[f] += gradients[n,h,w,f]
-                        X_grad_padded[
-                            n,
-                            h*self.stride[0]:h*self.stride[0]+self.kernel_size[0],
-                            w*self.stride[1]:w*self.stride[1]+self.kernel_size[1],
-                            :
-                        ] += self.weights[f] * gradients[n,h,w,f]
-        
+        X_grad_padded = convolve_back(batch_size,self.stride,self.kernel_size,self.filters,Z_height,Z_width,gradients,self.X,self.weights,self.weights_grad,self.bias_grad,X_grad_padded)        
         X_grad = X_grad_padded[
             :,
             self.pad[0]:-self.pad[1],
