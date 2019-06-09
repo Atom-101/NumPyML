@@ -87,7 +87,8 @@ class Model(object):
                 layer.weights -= lr*layer.weights_grad
                 layer.bias -= lr*layer.bias_grad
             elif type(layer).__name__ == 'BatchNorm':
-                pass
+                layer.gamma -= lr*layer.gamma_grad
+                layer.beta -= lr*layer.beta_grad
         
     def predict(self):
         pass

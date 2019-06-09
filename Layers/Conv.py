@@ -5,8 +5,8 @@ from Activations.standard_activations import *
 
 activations_dict = {
     'relu': (relu,relu_backward), 
-    'sigmoid': (sigmoid,sigmoid_backward)
-    #lrelu
+    'sigmoid': (sigmoid,sigmoid_backward),
+    'leaky_relu': (leaky_relu,leaky_relu_backward)
     #tanh
 }
 
@@ -114,12 +114,16 @@ class Conv(object):
         self.bias_grad = np.zeros_like(self.bias)
         X_grad_padded = np.zeros_like(self.X,dtype=np.float32)
         X_grad_padded = convolve_back(batch_size,self.stride,self.kernel_size,self.filters,Z_height,Z_width,gradients,self.X,self.weights,self.weights_grad,self.bias_grad,X_grad_padded)        
-        X_grad = X_grad_padded[
-            :,
-            self.pad[0]:-self.pad[1],
-            self.pad[2]:-self.pad[3],
-            :
-        ]
+        if self.padding != 'valid':
+            X_grad = X_grad_padded[
+                :,
+                self.pad[0]:-self.pad[1],
+                self.pad[2]:-self.pad[3],
+                :
+            ]
+            return X_grad
+        else:
+            return X_grad_padded
         return X_grad
 
     def _pad(self, X):
