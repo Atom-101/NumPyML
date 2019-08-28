@@ -21,19 +21,18 @@ initializer_dict = {
 @jit(nopython=True)
 def convolve(batch_size,stride,kernel_size,filters,Z_height,Z_width,Z,X,weights,bias):
     for n in range(batch_size):
-        for f in range(filters):
-            for h in range(Z_height):
-                for w in range(Z_width):
-                    Z[n,h,w,f] = np.sum(
-                        X[
-                            n, 
-                            h*stride[0]:h*stride[0]+kernel_size[0], 
-                            w*stride[1]:w*stride[1]+kernel_size[1],
-                            :
-                        ] *
-                        weights[f]
-                    )
-                    Z[n,h,w,f] += bias[f]
+        for h in range(Z_height):
+            for w in range(Z_width):
+                Z[n,h,w,:] = np.sum(
+                    X[
+                        n, 
+                        h*stride[0]:h*stride[0]+kernel_size[0], 
+                        w*stride[1]:w*stride[1]+kernel_size[1],
+                        :
+                    ] *
+                    weights
+                )
+                Z[n,h,w,:] += bias
     return Z
 
 @jit(nopython=True)
