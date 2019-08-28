@@ -29,6 +29,12 @@ class Dataset(object):
         Y = self.Y[indices]
         if self.lazy_load:
             X = self.read_fn(X)
+        # Per image normalization
+        # X = X-np.apply_over_axes(np.mean,X,list(range(1,X.ndim)))
+        # X = np.divide(X,np.apply_over_axes(np.std,X,list(range(1,X.ndim)))+1e-8)
+
+        # Rescale
+        # X = X/255.0
         return X,Y
     
 

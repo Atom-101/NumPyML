@@ -12,3 +12,16 @@ activations_dict = {
 class Activation(object):
     def __init__(self,activation):
         self.activation,self.activation_derivative = activations_dict[activation]
+    
+    def _init_weights(self,previous_layer=None):
+        try:
+            self.units = previous_layer.units
+        except:
+            self.output_height,self.output_width,self.filters = previous_layer.output_height,previous_layer.output_width,previous_layer.filters
+
+    def _forward_pass(self,X):
+        self.X = X
+        return self.activation(X)
+
+    def _backward_pass(self,gradients):
+        return self.activation_derivative(gradients,self.X)

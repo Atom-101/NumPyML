@@ -26,3 +26,15 @@ class BinaryCrossEntropy():
             numerator,
             denominator
         )
+        
+def softmax_cross_entropy_with_logits(logits,y):
+    shifted_logits = logits - np.max(logits,axis=1,keepdims=True)
+    Z = np.sum(np.exp(shifted_logits),axis=1,keepdims=True)
+    log_probs = shifted_logits - np.log(Z)
+    probs = np.exp(log_probs)
+    N = logits.shape[0]
+    loss = -np.sum(log_probs[np.arange(N),y.argmax(axis=-1)])/N
+    gradients = probs
+    gradients[np.arange(N),y.argmax(axis=-1)] -= 1
+    gradients/=N
+    return loss,gradients

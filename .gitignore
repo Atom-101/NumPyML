@@ -123,6 +123,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-train/
-.vscode/
-.pyc
+/train/
+.vscode
+*.pyc
+MnistTrain
+train
