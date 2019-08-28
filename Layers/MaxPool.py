@@ -1,6 +1,7 @@
 import numpy as np
 
 class MaxPool(object):
+    "Instantiate a max pool layer."
     def __init__(self, kernel_size, stride=None):
         try:
             int(kernel_size)

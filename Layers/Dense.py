@@ -10,7 +10,7 @@ activations_dict = {
     #tanh
 }
 class Dense(object):
-    # User init
+    "Instantiate a dense layer"
     def __init__(self,units,activation):
         if activation not in activations_dict.keys():
             raise ValueError("Invalid activation type")

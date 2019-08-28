@@ -1,6 +1,7 @@
 import numpy as np
 
 class BatchNorm(object):
+    "Instantiate a batch normalization layer"
     def __init__(self,momentum):
         self.momentum = momentum
 

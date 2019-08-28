@@ -10,6 +10,7 @@ activations_dict = {
 }
 
 class Conv(object):
+    "Instantiate a convolution layer. Quite slow due to Python loops"
     def __init__(self,kernel_size,filters,stride,padding,activation):
         # Follows (Filters, Height, Width, Channels) convention
         try:

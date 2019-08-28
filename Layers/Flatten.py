@@ -1,7 +1,7 @@
 import numpy as np
 
 class Flatten(object):
-    
+    "Instantiate a flatten layer. Flattens spatial outputs from a conv layer to be used by linear layers"
     def _init_weights(self,previous_layer):
         height,width,channels = previous_layer.output_height,previous_layer.output_width,previous_layer.filters
         self.units = height*width*channels
