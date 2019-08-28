@@ -10,10 +10,10 @@ def sigmoid(Z):
         1/(1+np.exp(-Z)), 
         np.exp(Z)/(1+np.exp(Z))
     )
-    return A
+    return np.nan_to_num(A)
 
 def sigmoid_backward(gradients, Z):
-	temp = np.exp(-Z)
+	temp = np.nan_to_num(np.exp(-Z))
 	temp = np.nan_to_num(np.divide(temp,(1+temp)**2))
 	Z_grad = np.multiply(gradients,temp)
 	return Z_grad
@@ -41,5 +41,5 @@ def leaky_relu_backward(gradients, Z, alpha=0.1):
 def linear(Z):
     return Z
 
-def linear_backward(gradients):
+def linear_backward(gradients,Z):
     return gradients

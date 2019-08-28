@@ -6,18 +6,15 @@ class BatchNorm(object):
 
     def _init_weights(self,previous_layer):
         if previous_layer.weights.ndim == 2:
-            ddim = previous_layer.weights.shape[1]
+            dim = previous_layer.weights.shape[1]
+            self.units = previous_layer.units
         else:
             dim= previous_layer.weights.shape[0]
+            self.output_height,self.output_width,self.filters = previous_layer.output_height,previous_layer.output_width,previous_layer.filters
         self.running_mean = np.zeros(dim)    
         self.running_var = np.zeros(dim)
         self.gamma = np.ones(dim)    
         self.beta = np.zeros(dim)
-
-        if previous_layer.weights.ndim == 2:
-            self.units = previous_layer.units
-        else:
-            self.output_height,self.output_width,self.filters = previous_layer.output_height,previous_layer.output_width,previous_layer.filters
 
     def _forward_pass(self,X,train):
         if train:

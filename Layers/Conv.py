@@ -2,12 +2,20 @@ import numpy as np
 import math
 from numba import jit
 from Activations.standard_activations import *
+from Activations.standard_initializers import *
 
 activations_dict = {
     'relu': (relu,relu_backward), 
     'sigmoid': (sigmoid,sigmoid_backward),
-    'leaky_relu': (leaky_relu,leaky_relu_backward)
+    'leaky_relu': (leaky_relu,leaky_relu_backward),
+    'linear': (linear,linear_backward)
     #tanh
+}
+
+initializer_dict = {
+    'gaussian': gaussian_init,
+    'kaiming_uniform': kaiming_uniform_init,
+    'kaiming_normal': kaiming_normal_init
 }
 
 @jit(nopython=True)
@@ -53,7 +61,7 @@ def convolve_back(batch_size,stride,kernel_size,filters,Z_height,Z_width,gradien
     return X_grad_padded
 
 class Conv(object):
-    def __init__(self,kernel_size,filters,stride,padding,activation):
+    def __init__(self,kernel_size,filters,stride,padding,activation,initializer='gaussian'):
         # Follows (Filters, Height, Width, Channels) convention
         try:
             int(kernel_size)
@@ -70,6 +78,7 @@ class Conv(object):
         self.stride = stride
         self.padding = padding
         self.activation, self.activation_derivative = activations_dict[activation]
+        self.initializer = initializer_dict[initializer]
         
         
     def _init_weights(self,previous_layer=None,input_shape=None):        
@@ -86,10 +95,9 @@ class Conv(object):
         self.output_height = int((height - self.kernel_size[0] + padh)/self.stride[0] + 1)
         self.output_width = int((width - self.kernel_size[1] + padw)/self.stride[1] + 1)
         
-        self.weights = np.random.normal(
-            loc=0,
-            scale=0.1,
-            size=(self.filters,self.kernel_size[0],self.kernel_size[1],channels)
+        self.weights = self.initializer(
+            size=(self.filters,self.kernel_size[0],self.kernel_size[1],channels),
+            n=self.filters
         )
         self.bias = np.zeros((self.filters))
         

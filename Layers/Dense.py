@@ -6,7 +6,8 @@ from Activations.standard_activations import *
 
 activations_dict = {
     'relu': (relu,relu_backward), 
-    'sigmoid': (sigmoid,sigmoid_backward)
+    'sigmoid': (sigmoid,sigmoid_backward),
+    'linear': (linear,linear_backward)
     #tanh
 }
 class Dense(object):
